@@ -15,7 +15,7 @@ Trade_Models = []
 
 for i in range(model_count):
     Trade_Models.append(Model_DL.model())
-    Trade_Models[i].load(model_name+str(i), min_diff=0.00000004, learning_rate=0.00000004, cycles=4)
+    Trade_Models[i].load(model_name+str(i), activation_values=[4 for i in range(3)], min_diff=0.00000004, learning_rate=0.000001, cycles=200)
 
 Trade_Data_test = Data_DL.data()
 
@@ -26,14 +26,14 @@ Trade_Data_validate = Data_DL.data()
 
 
 
-api_key = ""
-secret_key = ""
+api_key = "xtJNJ5ye25ze6DbFrX9zlMrcl16IyDeSUdAKVBOTou5vEb7RDWlFRTzK2EvurcJD"
+secret_key = "YU3boe3opckvNEwVvFpSEVm4JPjMheFOHIbtUDSEmQdlPn9OMhou2WWNPyQOg1yA"
 
 client = Client(api_key, secret_key)
 
 
 
-ticker = "BTCEUR"
+ticker = "BTCUSDT"
 
 trade_fees = Decimal(0.0)
 
@@ -85,16 +85,7 @@ while True:
     
     
     
-    input_values_test = []
-    target_values_test = []
-    
-    for i in range(len(change_moving_average_rates)-Trade_Models[0].input_count+1):
-        input_values_test += change_moving_average_rates[i:i+Trade_Models[0].input_count]
-    
-    for i in range(len(change_moving_average_rates)-Trade_Models[0].input_count-Trade_Models[0].output_count+1):
-        target_values_test += change_moving_average_rates[i+Trade_Models[0].input_count:i+Trade_Models[0].input_count+Trade_Models[0].output_count]
-    
-    Trade_Data_test.load(input_values_test, target_values_test)
+    Trade_Data_test.load(change_moving_average_rates[-Trade_Models[0].input_count:], [], 0, 0)
     
     recursive_output_values = [Decimal(0) for i in range(predicted_count)]
     
@@ -127,10 +118,7 @@ while True:
     step = 5
 
     for h in range(0, len(change_moving_average_rates)-Trade_Models[0].input_count+1-predicted_count, step):
-        input_values_uncertainty = input_values_test[h*Trade_Models[0].input_count:h*Trade_Models[0].input_count+Trade_Models[0].input_count]
-        target_values_uncertainty = target_values_test[h*Trade_Models[0].output_count:h*Trade_Models[0].output_count+Trade_Models[0].output_count]
-        
-        Trade_Data_uncertainty.load(input_values_uncertainty, target_values_uncertainty)
+        Trade_Data_uncertainty.load(change_moving_average_rates[h:h+Trade_Models[0].input_count], [], 0, 0)
         
         recursive_output_values_uncertainty = [Decimal(0) for i in range(predicted_count)]
         
@@ -251,15 +239,12 @@ while True:
     
     
     
-    #input_values_train = input_values_test[:-Trade_Models[0].input_count*Trade_Models[0].output_count]
-    #target_values_train = target_values_test
+    Trade_Data_train.load(change_moving_average_rates[len(change_moving_average_rates)//2:], [], 1, 1)
+    Trade_Data_validate.load(change_moving_average_rates[:len(change_moving_average_rates)//2], [], 1, 1)
     
-    #Trade_Data_train.load(input_values_train[int(len(input_values_train)/2):], target_values_train[int(len(target_values_train)/2):])
-    #Trade_Data_validate.load(input_values_train[:int(len(input_values_train)/2)], target_values_train[:int(len(target_values_train)/2)])
-    
-    #for i in range(model_count):
-        #Trade_Models[i].train(Trade_Data_train, Trade_Data_validate)
-        #Trade_Models[i].save()
+    for i in range(model_count):
+        Trade_Models[i].train(Trade_Data_train, Trade_Data_validate)
+        Trade_Models[i].save()
     
     
     
