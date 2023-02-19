@@ -1,7 +1,9 @@
 from binance import Client, ThreadedWebsocketManager, ThreadedDepthCacheManager
 import matplotlib.pyplot as plt
 from numpy import complex128
-from DeepLearner import *
+from DeepLearningOptimized import Model_DL
+from DeepLearningOptimized import Data_DL
+from math import *
 from decimal import *
 from time import *
 
@@ -13,19 +15,19 @@ model_count = int(input("Model count: "))
 Trade_Models = []
 
 for i in range(model_count):
-    Trade_Models.append(Model_Class())
+    Trade_Models.append(Model_DL.model())
     Trade_Models[i].load(model_name+str(i), min_diff=0.00000004, learning_rate=0.00000004, cycles=4)
 
-Trade_Data = Data_Class(Trade_Models[0].input_count)
+Trade_Data_test = Data_DL.data()
 
-Trade_Data_uncertainty = Data_Class(Trade_Models[0].input_count)
+Trade_Data_uncertainty = Data_DL.data()
 
-Trade_Data_train = Data_Class(Trade_Models[0].input_count)
+Trade_Data_train = Data_DL.data()
+Trade_Data_validate = Data_DL.data()
 
 
-
-api_key = "xtJNJ5ye25ze6DbFrX9zlMrcl16IyDeSUdAKVBOTou5vEb7RDWlFRTzK2EvurcJD"
-secret_key = "YU3boe3opckvNEwVvFpSEVm4JPjMheFOHIbtUDSEmQdlPn9OMhou2WWNPyQOg1yA"
+api_key = ""
+secret_key = ""
 
 client = Client(api_key, secret_key)
 
@@ -91,12 +93,12 @@ while True:
         for i in range(len(change_moving_average_rates)-Trade_Models[0].input_count-Trade_Models[0].output_count+1):
             target_values_test += change_moving_average_rates[i+Trade_Models[0].input_count:i+Trade_Models[0].input_count+Trade_Models[0].output_count]
         
-        Trade_Data.load([], [], [], [], input_values_test, target_values_test)
+        Trade_Data_test.load(input_values_test, target_values_test)
         
         recursive_output_values = [Decimal(0) for i in range(predicted_count)]
         
         for i in range(model_count):
-            Trade_Models[i].recursive_test(Trade_Data, loop_count=predicted_count, feedback_count=1, pivot_value=1, auto_adjust=False)
+            Trade_Models[i].recursive_test(Trade_Data_test, loop_count=predicted_count, feedback_count=1, pivot_value=1, auto_adjust=False)
             
             for j in range(predicted_count):
                 recursive_output_values[j] += Trade_Models[i].recursive_output_values[-predicted_count+j]/Decimal(model_count)
@@ -132,7 +134,7 @@ while True:
             input_values_uncertainty = input_values_test[h*Trade_Models[0].input_count:h*Trade_Models[0].input_count+Trade_Models[0].input_count]
             target_values_uncertainty = target_values_test[h*Trade_Models[0].output_count:h*Trade_Models[0].output_count+Trade_Models[0].output_count]
             
-            Trade_Data_uncertainty.load([], [], [], [], input_values_uncertainty, target_values_uncertainty)
+            Trade_Data_uncertainty.load(input_values_uncertainty, target_values_uncertainty)
             
             recursive_output_values_uncertainty = [Decimal(0) for i in range(predicted_count)]
             
@@ -272,10 +274,11 @@ while True:
         input_values_train = input_values_test[:-Trade_Models[0].input_count*Trade_Models[0].output_count]
         target_values_train = target_values_test
         
-        Trade_Data_train.load(input_values_train[int(len(input_values_train)/2):], target_values_train[int(len(target_values_train)/2):], input_values_train[:int(len(input_values_train)/2)], target_values_train[:int(len(target_values_train)/2)], [], [])
+        Trade_Data_train.load(input_values_train[int(len(input_values_train)/2):], target_values_train[int(len(target_values_train)/2):])
+        Trade_Data_validate.load(input_values_train[:int(len(input_values_train)/2)], target_values_train[:int(len(target_values_train)/2)])
         
         for i in range(model_count):
-            Trade_Models[i].train(Trade_Data_train)
+            Trade_Models[i].train(Trade_Data_train, Trade_Data_validate)
             Trade_Models[i].save()
     
     

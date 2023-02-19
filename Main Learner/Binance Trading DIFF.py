@@ -1,6 +1,7 @@
 from binance import Client, ThreadedWebsocketManager, ThreadedDepthCacheManager
 import matplotlib.pyplot as plt
-from DeepLearner import *
+from DeepLearningOptimized import Model_DL
+from DeepLearningOptimized import Data_DL
 from decimal import *
 from time import *
 
@@ -12,13 +13,13 @@ model_count = int(input("Model count: "))
 Trade_Models = []
 
 for i in range(model_count):
-    Trade_Models.append(Model_Class())
+    Trade_Models.append(Model_DL.model())
     Trade_Models[i].load(model_name+str(i))
 
-Trade_Data = Data_Class(Trade_Models[0].input_count)
+Trade_Data = Data_DL.data()
 
-api_key = "xtJNJ5ye25ze6DbFrX9zlMrcl16IyDeSUdAKVBOTou5vEb7RDWlFRTzK2EvurcJD"
-secret_key = "YU3boe3opckvNEwVvFpSEVm4JPjMheFOHIbtUDSEmQdlPn9OMhou2WWNPyQOg1yA"
+api_key = ""
+secret_key = ""
 
 client = Client(api_key, secret_key)
 
@@ -62,7 +63,7 @@ while True:
     
     y_values = moving_average_previous_rates
     
-    Trade_Data.load([], [], [], [], moving_average_change_rates, [])
+    Trade_Data.load(moving_average_change_rates, [])
     
     recursive_output_values = [Decimal(0) for i in range(predicted_count)]
     

@@ -1,8 +1,10 @@
 from binance import Client, ThreadedWebsocketManager, ThreadedDepthCacheManager
 import matplotlib.pyplot as plt
 from numpy import complex128
-from DeepLearner import *
+from DeepLearningOptimized import Model_DL
+from DeepLearningOptimized import Data_DL
 from decimal import *
+from math import *
 from time import *
 
 getcontext().prec = 64
@@ -13,15 +15,15 @@ model_count = int(input("Model count: "))
 Trade_Models = []
 
 for i in range(model_count):
-    Trade_Models.append(Model_Class())
+    Trade_Models.append(Model_DL.model())
     Trade_Models[i].load(model_name+str(i), min_diff=0.00000004, learning_rate=0.00000004, cycles=4)
 
-Trade_Data = Data_Class()
+Trade_Data_test = Data_DL.data()
 
-Trade_Data_uncertainty = Data_Class()
+Trade_Data_uncertainty = Data_DL.data()
 
-Trade_Data_train = Data_Class()
-Trade_Data_validate = Data_Class()
+Trade_Data_train = Data_DL.data()
+Trade_Data_validate = Data_DL.data()
 
 shift_count = 1
 
@@ -85,12 +87,12 @@ while True:
     
     
     if counter%1 == 0:
-        Trade_Data.load(change_moving_average_rates[-Trade_Models[0].input_count:], [], 0, 0)
+        Trade_Data_test.load(change_moving_average_rates[-Trade_Models[0].input_count:], [], 0, 0)
         
         recursive_output_values = [Decimal(0) for i in range(predicted_count)]
         
         for i in range(model_count):
-            Trade_Models[i].recursive_test(Trade_Data, loop_count=predicted_count, feedback_count=1, pivot_value=1, auto_adjust=False)
+            Trade_Models[i].recursive_test(Trade_Data_test, loop_count=predicted_count, feedback_count=1, pivot_value=1, auto_adjust=False)
             
             for j in range(predicted_count):
                 recursive_output_values[j] += Trade_Models[i].recursive_output_values[-predicted_count+j]/Decimal(model_count)

@@ -1,16 +1,18 @@
-from DeepLearner import *
+from DeepLearningOptimized import Model_DL
+from DeepLearningOptimized import Data_DL
+from decimal import *
 import chess.pgn
 
 model_name0 = input("Model name 0: ")
 model_name1 = input("Model name 1: ")
 
-Model0 = Model_Class()
+Model0 = Model_DL.model()
 Model0.load(model_name0)
 
-Model1 = Model_Class()
+Model1 = Model_DL.model()
 Model1.load(model_name1)
 
-Data = Data_Class()
+Data = Data_DL.data()
 
 game = chess.pgn.Game()
 
