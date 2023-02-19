@@ -12,7 +12,7 @@ for i in range(500):
     
     for i in range(10):
         p1 = Decimal(random()+0.5)
-        o1 = (p1*k0)**k1
+        o1 = p1**k1+k0
 
         to_write += str(p1) + "," + str(k0) + ":" + str(o1) + "\n"
     
@@ -20,7 +20,7 @@ for i in range(500):
     
     for i in range(10):
         k0 = Decimal(random()+0.5)
-        o1 = (p1*k0)**k1
+        o1 = p1**k1+k0
 
         to_write += str(p1) + "," + str(k0) + ":" + str(o1) + "\n"
 
@@ -36,7 +36,7 @@ for i in range(500):
     
     for i in range(10):
         p1 = Decimal(random()+0.5)
-        o1 = (p1*k0)**k1
+        o1 = p1**k1+k0
 
         to_write += str(p1) + "," + str(k0) + ":" + str(o1) + "\n"
     
@@ -44,7 +44,7 @@ for i in range(500):
     
     for i in range(10):
         k0 = Decimal(random()+0.5)
-        o1 = (p1*k0)**k1
+        o1 = p1**k1+k0
 
         to_write += str(p1) + "," + str(k0) + ":" + str(o1) + "\n"
 
